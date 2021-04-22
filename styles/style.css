@@ -1,5 +1,6 @@
-svg {
-    background-color: white;
+/* /* svg {
+    /* couleur du fond de carte (eau)
+    background-color: rgb(219, 219, 219);
 }
 
 h1 {
@@ -7,14 +8,16 @@ h1 {
     font-size: 18px;
     font-family: sans-serif;
     font-weight: bold;
+    margin-left: 10px;
     margin: 0;
     padding-bottom: 10px;
 
 }
 
     #map {
-    width: 800px;
-    margin-left: auto;
+    width: 1000px;
+    /* pour l'instant on enlève les marges pour que la carte soit collée à gauche */
+    /* margin-left: auto;
     margin-right: auto;
     margin-top: 20px;
     padding: 20px;
@@ -23,6 +26,44 @@ h1 {
 }
 
 path:hover {
-    fill: rgba(8, 81, 156, 0.2);
+    /* changement de la couleur qu'on passe au dessus d'un pays
+    fill: rgba(156, 67, 8, 0.2);
     cursor:pointer;
+} */
+
+#info {
+    margin-top: 50px;
+}
+
+#deptinfo {
+    margin-top: 30px;
+}
+.country {
+    cursor: pointer;
+    stroke: black;
+    stroke-width: .5px;
+}
+
+.country:hover {
+    stroke-width: 2px;
+}
+div.tooltip {
+    position: absolute;
+    opacity:0.8;
+    z-index:1000;
+    text-align:left;
+    border-radius:4px;
+    -moz-border-radius:4px;
+    -webkit-border-radius:4px;
+    padding:8px;
+    color:#fff;
+    background-color:#000;
+    font: 12px sans-serif;
+    max-width: 300px;
+    height: 60px;
+}
+
+#svg {
+    display: block;
+    margin: auto;
 }
