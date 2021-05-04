@@ -166,15 +166,15 @@ function addLegend(min, max) {
 					d3.selectAll("path[scorecolor='" + colors[d] + "']")
 						.style('fill', colors[d]);
 				});
-        
-            legend.append('svg:rect')
+            
+                // création d'un carré gris sous la légende pour les données manquantes
+                legend.append('svg:rect')
                 .attr('y', legendCellSize + colors.length * legendCellSize)
                 .attr('height', legendCellSize + 'px')
                 .attr('width', legendCellSize + 'px')
                 .attr('x', 5)
-                .style("fill", "#999");
+                .style("fill", "#999")
             
-                // création d'un carré gris sous la légende pour les données manquantes
             legend.append("text")
                 .attr("x", 30)
                 .attr("y", 35 + colors.length * legendCellSize)
