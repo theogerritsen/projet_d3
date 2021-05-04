@@ -23,22 +23,11 @@ const path = d3.geoPath()
     .pointRadius(2)
     .projection(projection);
 
-// TITRES ET SOUS-TITRES
 svg.append("text")
     .attr("x", (width / 2))
     .attr("y", 25)
     .attr("text-anchor", "middle")
     .style("fill", "#c1d3b8")
-    .style("font-weight", "300")
-    .style("font-size", "16px")
-    .text("Sentiment de sécurité des habitants de chaque pays en 2018");
-
-svg.append("text")
-    .attr("x", (width / 2))
-    .attr("y", 50)
-    .attr("text-anchor", "middle")
-    .style("fill", "#929292")
-    .style("font-weight", "200")
     .style("font-size", "12px")
     .text("(source : Gallup Report 2018 - Global Law and Order)");
 
@@ -75,21 +64,7 @@ Promise.all(promises).then(function(values) {
 
         // TRAITEMENT DU FICHIER CSV
         // fonction pour réduire le nom de certains pays
-function shortCountryName(country) {
-    return country.replace("Démocratique", "Dem.").replace("République", "Rep.");
-}
 
-// fonction pour retrouver l'index d'une couleur dans notre tableau colors
-// on va aller chercher la couleur de notre index pour sélectionner tous
-// les pays qui ont cette couleur
-function getColorIndex(color) {
-    for (var i = 0; i < colors.length; i++) {
-        if (colors[i] === color) {
-            return i;
-        }
-    }
-    return -1;
-}
     // calcul du min max de la colonne score
     const min = d3.min(scores, d =>  +d.score),
         max = d3.max(scores, d =>  +d.score);
@@ -108,7 +83,6 @@ function getColorIndex(color) {
     scores.forEach(function(e,i) {
         // récupération d'un polygone associé au pays
         var countryPath = d3.select("#code" + e.code);
-        console.log(countryPath)
         countryPath
         // ajout d'un attribut scorecolor qui sera utiliser pour sélectionner tous les ays d'une même couleur
             .attr("scorecolor", quantile(+e.score))
@@ -128,8 +102,7 @@ function getColorIndex(color) {
                     .text(e.score);
                     // positionne le curseur de la légende au bon endroit selon le score
                 legend.select("#cursor")
-                // on prend la position du carré de notre légende + 5, la couleur de notre index
-                    .attr("transform", "translate(" + (legendCellSize + 5) + ", " + (getColorIndex(quantile(+e.score)) * legendCellSize) + ")")
+                    .attr('transform', 'translate(' + (legendCellSize + 5) + ', ' + (getColorIndex(quantile(+e.score)) * legendCellSize) + ')')
                     .style("display", null);
             })
             // ajout d'un événement lorsque le curseur part du pays
@@ -141,18 +114,17 @@ function getColorIndex(color) {
                 // enlève le curseur de la légende
                 legend.select("#cursor").style("display", "none");
             })
-            .on("mousemove", (event) => {
-                // d3.mouse n'est plus une fonction gérée par la v6 -> utiliser d3.pointer(event)
+            .on("mousemove", function(d) {
+                // d3.mouse n'est plus une fonction gérée par la v6 -> utiliser d3.pointer
                 // déplace le tooltip selon la position du curseur
-                var mouse = d3.pointer(event);
-                // console.log(mouse)
+                var mouse = d3.pointer(this);
                 // évite que le tooltip se retrouve sous le curseur de notre souris (avec le translate)
                 tooltip.attr("transform", "translate(" + mouse[0] + "," + (mouse[1] - 75) + ")");
             });
     });
 });
 
-// CONSTRUCTION DE LA LEGENDE GRADUEE
+// CONSTRUCTION DE LA LEGENDE
 
 function addLegend(min, max) {
     var legend = svg.append('g')
@@ -161,37 +133,27 @@ function addLegend(min, max) {
 
     // palette de couleur
     legend.selectAll()
-			.data(d3.range(colors.length))
-			.enter().append('svg:rect')
-				.attr('height', legendCellSize + 'px')
-				.attr('width', legendCellSize + 'px')
-				.attr('x', 5)
-				.attr('y', d => d * legendCellSize)
-				.attr('class', 'legend-cell')
-				.style("fill", d => colors[d])
-                // positionnement du curseur de la légende selon la souris
-                // sélection de tous les pays selon la position du curseur
-                // ici, par rapport à la v5 de D3, on doit rajouter le event 
-				.on("mouseover", function(event, d) {
-                    // on sélectionne notre curseur
-					legend.select("#cursor")
-                        // on lui met la position correspondante
-						.attr('transform', 'translate(' + (legendCellSize + 5) + ', ' + (d * legendCellSize) + ')')
-						.style("display", null);
-                    // on sélectionne tous les pays qui ont la valeur sélectionnée par notre curseur
-					d3.selectAll("path[scorecolor='" + colors[d] + "']")
-						.style('fill', "#9966cc");
-				})
-                // création d'un énévement lorsque la souris part
-                // pour enlever les pays sélectionnés
-				.on("mouseout", function(event, d) {
-					legend.select("#cursor")
-                        // on enlève tous les pays sélectionnés
-						.style("display", "none");
-					d3.selectAll("path[scorecolor='" + colors[d] + "']")
-                        // et on leur remet la couleur correspondante à leur score
-						.style('fill', colors[d]);
-				});
+            .data(d3.range(colors.length))
+            .enter().append('svg:rect')
+                .attr('height', legendCellSize + 'px')
+                .attr('width', legendCellSize + 'px')
+                .attr('x', 5)
+                .attr('y', d => d * legendCellSize)
+                .attr('class', 'legend-cell')
+                .style("fill", d => colors[d])
+                .on("mouseover", function(d) {
+                    legend.select("#cursor")
+                        .attr('transform', 'translate(' + (legendCellSize + 5) + ', ' + (d * legendCellSize) + ')')
+                        .style("display", null);
+                    d3.selectAll("path[scorecolor='" + colors[d] + "']")
+                        .style('fill', "#9966cc");
+                })
+                .on("mouseout", function(d) {
+                    legend.select("#cursor")
+                        .style("display", "none");
+                    d3.selectAll("path[scorecolor='" + colors[d] + "']")
+                        .style('fill', colors[d]);
+                });
             
                 // création d'un carré gris sous la légende pour les données manquantes
                 legend.append('svg:rect')
@@ -201,7 +163,6 @@ function addLegend(min, max) {
                 .attr('x', 5)
                 .style("fill", "#999")
             
-                // texte pour les valeurs manquantes
             legend.append("text")
                 .attr("x", 30)
                 .attr("y", 35 + colors.length * legendCellSize)
@@ -279,4 +240,101 @@ function addTooltip(){
     return tooltip;
 }
 
+    addSvgLegend1();
+    function addSvgLegend1() {
+        const width = 200,
+            height = 400;
+
+        const svgLegend1 = d3.select('#svgLegend1').append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("class", "svg");
+        
+        svgLegend1.append("circle")
+            .attr("cx", 40)
+            .attr("cy", 50)
+            .attr("r", 3)
+            .style("fill", "red");
+    }
+    
+    addSvgLegend2();
+    function addSvgLegend2() {
+        const width = 200,
+            height = 400;
+
+        const svgLegend2 = d3.select('#svgLegend2').append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("class", "svg");
+        
+        svgLegend2.append("circle")
+            .attr("cx", 40)
+            .attr("cy", 50)
+            .attr("r", 3)
+            .style("fill", "red");
+        
+        var legend = svgLegend2.append('g')
+            .attr('transform', 'translate(40, 50)');
+        
+        legend.selectAll()
+            .data(d3.range(colors.length))
+            .enter().append('svg:rect')
+                .attr('y', d => d * legendCellSize)
+                .attr('height', legendCellSize + 'px')
+                .attr('width', legendCellSize + 'px')
+                .attr('x', 5)
+                .style("fill", d => colors[d]);
+    }
+    function shortCountryName(country) {
+        return country.replace("Démocratique", "Dem.").replace("République", "Rep.");
+    }
+    
+    function getColorIndex(color) {
+        for (var i = 0; i < colors.length; i++) {
+            if (colors[i] === color) {
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    addSvgLegend3();
+    function addSvgLegend3() {
+        const width = 200,
+            height = 400;
+
+        const svgLegend3 = d3.select('#svgLegend3').append("svg")
+            .attr("width", width)
+            .attr("height", height)
+            .attr("class", "svg");
+        
+        svgLegend3.append("circle")
+            .attr("cx", 40)
+            .attr("cy", 50)
+            .attr("r", 3)
+            .style("fill", "red");
+        
+        var legend = svgLegend3.append('g')
+            .attr('transform', 'translate(40, 50)');
+        
+        legend.selectAll()
+            .data(d3.range(colors.length))
+            .enter().append('svg:rect')
+                .attr('y', d => d * legendCellSize)
+                .attr('height', legendCellSize + 'px')
+                .attr('width', legendCellSize + 'px')
+                .attr('x', 5)
+                .style("fill", d => colors[d]);
+                
+        var legendScale = d3.scaleLinear().domain([44, 97])
+            .range([0, colors.length * legendCellSize]);
+        
+        legendAxis = legend.append("g")
+            .attr("class", "axis")
+            .call(d3.axisLeft(legendScale));
+    }
+
+// CONSTRUCTION DU TITRE ET DU SOUS-TITRE
+
+// la valeur de x associé à text-anchor défini plus haut permet de centrer les titres
 
