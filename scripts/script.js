@@ -34,11 +34,11 @@ const cntry = svg.append("g");
 // utilisation des promesses pour syncrhoniser le chargement des deux ficheirs
 var promises = [];
 promises.push(d3.json('data/swiss_coords_merc2.geojson'));
-promises.push(d3.csv("data/swiss_pop.csv"));
+promises.push(d3.tsv("data/pop-fem-2034-2015.tsv"));
 
 Promise.all(promises).then(function(values){
     const geojson = values[0]; // récupération du fichier JSON via la première promesse
-    const csv = values[1]; // récupération du fichier CSV via la deuxième promesse
+    const tsv = values[1]; // récupération du fichier CSV via la deuxième promesse
 
     var features = cntry
         .selectAll("path")
@@ -46,7 +46,7 @@ Promise.all(promises).then(function(values){
         .enter() // enter représente les éléments qui doivent être ajouter
         .append("path") // ajouter un élément avec le nom désiré
         // ici on va aller chercher la propriété COUNTRY dans notre fichier json pour les canton
-        .attr('id', d => "d" + d.properties.ABBREV)
+        .attr('id', d => "d" + d.properties.NAME)
         .attr("d", path);
         // couleur de la bordure des polygones (canton)
         // rgba permet aussi de gérer l'opacité
@@ -58,7 +58,7 @@ Promise.all(promises).then(function(values){
 // obtention de la couleur de chaque canton selon sa population
 var quantile = d3.scaleQuantile() //.scaleQuantile() nous permet d'obtenir des projections discontinues entre 0 et le max de population
 // vers le range 1 à 9 par ex
-    .domain([0, d3.max(csv, e => e.POP)])
+    .domain([0, d3.max(tsv, e => e.pop)])
     .range(d3.range(9));
 
 
@@ -90,7 +90,7 @@ legend.selectAll('.colorbar')
 // 1) définition du domaine (scale) rpz une projection d'un nombre entre 0 et max pop
 // le range de destination tient en compte la hauteur de nos carré (20px) et leur nombre (entre 0 et 9)
 var legendScale = d3.scaleLinear()
-    .domain([0, d3.max(csv, e => +e.POP)])
+    .domain([0, d3.max(tsv, e => +e.pop)])
     .range([0, 9 * 20]);
 
     // définition de l'axe qu'utilise le domain construit avant
@@ -102,13 +102,13 @@ var legendScale = d3.scaleLinear()
     //////////////////////////////////////////
 // traitement du fichier CSV//////////////////
 //////////////////////////////////////////////
-csv.forEach(function(e,i) {
+tsv.forEach(function(e,i) {
     // on choisit le code de notre canton
-    d3.select("#d" + e.ABBREV)
+    d3.select("#d" + e.name)
     // on ajoute un attribut de couleur au canton selon la fonction quantile qu'on a défini plus haut
     // permet d'ajouter une classe é chaque canton canton selon sa population par rapport au quantile dans lequel
     // il se trouve
-    .attr("class", d => "country q" + quantile(+e.POP) + "-9")
+    .attr("class", d => "country q" + quantile(+e.pop) + "-9")
     // événement de mouseover quand on passe au dessus de chaque canton
     // .on("mouseover", function(d) {
     //     div.transition()
