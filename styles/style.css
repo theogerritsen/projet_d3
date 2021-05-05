@@ -1,14 +1,14 @@
 .svg {
     display: block;
     margin: auto;
-    background: #222b1d;
+    background: #232521;
     color: #bebebe;
-    font-family: "Lucida Console", Monaco, monospace;
+    font-family: "Helvetica";
 }
     
-.country {
+.cnt {
     fill: #999;
-    stroke: black;
+    stroke: white;
     stroke-width: 0.5px;
     stroke-linecap: round;
     stroke-linejoin: round;

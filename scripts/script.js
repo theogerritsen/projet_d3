@@ -34,7 +34,7 @@ const cntry = svg.append("g");
 // utilisation des promesses pour syncrhoniser le chargement des deux ficheirs
 var promises = [];
 promises.push(d3.json('data/swiss_coords_merc2.geojson'));
-promises.push(d3.tsv("data/pop-fem-2034-2015.tsv"));
+promises.push(d3.tsv("data/pop-fem-2034-2015.csv"));
 
 Promise.all(promises).then(function(values){
     const geojson = values[0]; // récupération du fichier JSON via la première promesse

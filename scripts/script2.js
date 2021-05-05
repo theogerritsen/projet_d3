@@ -16,6 +16,8 @@ const svg = d3.select('#map').append("svg")
 // définition de la projection
 // https://github.com/d3/d3-geo#azimuthal-projections
 const projection = d3.geoNaturalEarth1()
+// permet de gérer l'échelle
+    .center([8.19, 46.845]) // Center on France
     .scale(1)
     .translate([0, 0]);
 
@@ -64,13 +66,14 @@ Promise.all(promises).then(function(values) {
         .translate(t);
     
         // on associe à chaque pays un id
-    cGroup.selectAll("path")
+    const a = cGroup.selectAll("path")
         .data(geojson.features)
         .enter()
         .append("path")
         .attr("d", path)
         .attr("id", d => "code" + d.id)
         .attr("class", "country");
+        console.log(a)
     
 
         // TRAITEMENT DU FICHIER CSV
@@ -108,7 +111,6 @@ function getColorIndex(color) {
     scores.forEach(function(e,i) {
         // récupération d'un polygone associé au pays
         var countryPath = d3.select("#code" + e.code);
-        console.log(countryPath)
         countryPath
         // ajout d'un attribut scorecolor qui sera utiliser pour sélectionner tous les ays d'une même couleur
             .attr("scorecolor", quantile(+e.score))

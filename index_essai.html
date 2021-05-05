@@ -1,59 +1,24 @@
 <!DOCTYPE html>
+<html lang="en">
 <head>
-<meta charset="utf-8">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Premier essai de carte</title>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script src="https://unpkg.com/topojson@3"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
+    <script src="https://d3js.org/d3-geo-projection.v3.min.js"></script>
+    <link rel="stylesheet" href="styles/style.css">
+    <!-- fichier css contenant tous les dégradés de couleurs-->
+    <link rel="stylesheet" href="styles/colorbrewer.css">
 </head>
 <body>
-<style>
- 
-.country {
-  fill: #222;
-}
-
-.canton-boundaries {
-  fill: none;
-  stroke: #fff;
-  stroke-width: 1;
-}
- 
-.municipality-boundaries {
-  fill: none;
-  stroke: #fff;
-  stroke-width: .3;
-}
- 
-</style>
-<body>
-<script src="https://d3js.org/d3.v3.min.js"></script>
-<script src="https://d3js.org/topojson.v1.min.js"></script>
-<script>
- 
-var width = 960,
-    height = 500;
- 
-var path = d3.geo.path()
-  .projection(null);
- 
-var svg = d3.select("body").append("svg")
-    .attr("width", width)
-    .attr("height", height);
- 
-d3.json("data/suisse_merc.geojson", function(error, ch) {
-  svg.append("path")
-    .datum(topojson.feature(ch, ch.objects.country))
-    .attr("class", "country")
-    .attr("d", path);
- 
-  svg.append("path")
-    .datum(topojson.mesh(ch, ch.objects.municipalities, function(a, b) { return a !== b; }))
-    .attr("class", "municipality-boundaries")
-    .attr("d", path);
- 
-  svg.append("path")
-    .datum(topojson.mesh(ch, ch.objects.cantons, function(a, b) { return a !== b; }))
-    .attr("class", "canton-boundaries")
-    .attr("d", path);
-});
- 
-</script>
+	<div id="container" class="container">
+    <div id="map">
+        <h1>Carte intéractive</h1>
+    </div>
+    <script src="scripts/script2.js"></script>
+</div>
 </body>
 </html>
