@@ -1,9 +1,9 @@
 // initialisation
 
-const width = document.getElementById("container").offsetWidth * 0.95,
+const width = document.getElementById("container").offsetWidth * 0.5,
     height = 500,
     legendCellSize = 20,
-    colors = ['#d4eac7', '#c6e3b5', '#b7dda2', '#a9d68f', '#9bcf7d', '#8cc86a', '#7ec157', '#77be4e', '#70ba45', '#65a83e', '#599537', '#4e8230', '#437029', '#385d22', '#2d4a1c', '#223815'];
+    colors = ['#ffffcc', '#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8', '#253494'];
 
 const svg = d3.select('#map').append("svg")
     .attr("id", "svg")
@@ -164,6 +164,8 @@ function addLegend(min, max) {
 
     // palette de couleur
     legend.selectAll()
+    // on va chercher la longueur de notre liste colors pour avoir
+    // un nombre de carré de couleur correspondant à notre nobmre de couleur
             .data(d3.range(colors.length))
             .enter().append('svg:rect')
                 .attr('height', legendCellSize + 'px')
@@ -221,12 +223,16 @@ function addLegend(min, max) {
                 // on met le curseur en violet comme les pays
                 .style('fill', "#9966cc");
         // graduation de l'échelle
-        var legendScale = d3.scaleLinear().domain([min, max])
-            .range([0, colors.length * legendCellSize]);
-                
+
+        var legendScale = d3.scaleSequential().domain([0, 1500000])
+            .range([0, colors.length * legendCellSize])
+        const yAxisGenerator = d3.axisLeft(legendScale)
+        // on ajoute les valeurs des ticks de notre légende
+        yAxisGenerator.tickValues([0, 250000, 500000, 750000, 1000000, 1250000, 1500000]);
         legendAxis = legend.append("g")
             .attr("class", "axis")
-            .call(d3.axisLeft(legendScale));
+            .call(yAxisGenerator);
+
 
         return legend;
 
