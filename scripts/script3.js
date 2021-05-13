@@ -1,9 +1,9 @@
 // initialisation
 
-const width = document.getElementById("container").offsetWidth * 0.5,
-    height = 500,
+const width = document.getElementById("container").offsetWidth * 0.9,
+    height = 700,
     legendCellSize = 20,
-    colors = ['#ffffcc', '#c7e9b4', '#7fcdbb', '#41b6c4', '#2c7fb8', '#253494'];
+    colors = ['#ffffcc', '#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
 
 const svg = d3.select('#map').append("svg")
     .attr("id", "svg")
@@ -33,7 +33,7 @@ svg.append("text")
     .style("fill", "#c1d3b8")
     .style("font-weight", "300")
     .style("font-size", "16px")
-    .text("Population résidente par canton (2019)");
+    .text("Proportion de jeunes (0-19 ans) par canton (2019)");
 
 /* svg.append("text")
     .attr("x", (width / 2))
@@ -59,8 +59,8 @@ Promise.all(promises).then(function(values) {
     var b  = path.bounds(geojson),
     // dimension de notre carte
     // le .80 permet de calculer 80% de la place à notre carte que nous avons assigné à notre canevas SVG
-        s = .80 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-        t = [(width - s * (b[1][0] + b[0][0])) / 2, (height - s * (b[1][1] + b[0][1])) / 2];
+        s = .70 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+        t = [(900 - s * (b[1][0] + b[0][0])) / 2, (600 - s * (b[1][1] + b[0][1])) / 2];
 
         projection
         .scale(s)
@@ -224,11 +224,11 @@ function addLegend(min, max) {
                 .style('fill', "#9966cc");
         // graduation de l'échelle
 
-        var legendScale = d3.scaleSequential().domain([0, 1500000])
+        var legendScale = d3.scaleSequential().domain([min, max])
             .range([0, colors.length * legendCellSize])
         const yAxisGenerator = d3.axisLeft(legendScale)
         // on ajoute les valeurs des ticks de notre légende
-        yAxisGenerator.tickValues([0, 250000, 500000, 750000, 1000000, 1250000, 1500000]);
+        yAxisGenerator.tickValues([min, 0.184, 0.194, 0.204, 0.214, max]);
         legendAxis = legend.append("g")
             .attr("class", "axis")
             .call(yAxisGenerator);
@@ -237,7 +237,12 @@ function addLegend(min, max) {
         return legend;
 
 }
-console.log("hello7")
+// construction du graphique scatter plot
+
+function addGraph() {
+    var scatterplot = svg.append("g")
+        .attr('transform', 'translate(80, 50)')
+}
 // CONSTRUCTION DU TOOL TIP
 function addTooltip(){
     var tooltip = svg.append("g") // groupe pour tout le tooltip
@@ -245,25 +250,25 @@ function addTooltip(){
         .style("display", "none");
 
     tooltip.append("polyline") // rectangle contenant le texte
-        .attr("points", "0,0 210,0 210,60 0,60 0,0")
-        .style("fill", "#222b1d")
-        .style("stroke", "black")
-        .style("opacity", "0.9")
+        .attr("points", "30,0 180,0 180,60 30,60 30,0")
+        .style("fill", "#c6c6c6")
+        .style("stroke", "#838383")
+        .style("opacity", "0.8")
         .style("stroke-width", "1")
         .style("padding", "1em");
 
     tooltip.append("line") // une ligne entre les noms des pays et les scores
-        .attr("x1", 40)
+        .attr("x1", 50)
         .attr("y1", 25)
         .attr("x2", 160)
         .attr("y2", 25)
-        .style("stroke", "#929292")
+        .style("stroke", "#4e4e4e")
         .style("stroke-width", "0.5")
         .style("transform", "translate(0, 5)");
 
     var text = tooltip.append("text") // text contenant tout les tspan
         .style("font-size", "13px")
-        .style("fill", "#c1d3b8")
+        .style("fill", "black")
         .attr("transform", "translate(0, 20)");
 
     text.append("tspan") // update des noms des pays par leur id
@@ -278,12 +283,12 @@ function addTooltip(){
         .attr("x", 105)
         .attr("y", 30)
         .attr("text-anchor", "middle")
-        .style("fill", "#929292")
+        .style("fill", "#4e4e4e")
         .text("Population : ");
 
     text.append("tspan") // score updaté par son id
         .attr("id", "tooltip-score")
-        .style("fill", "#c1d3b8")
+        .style("fill", "#4e4e4e")
         .style("font-weight", "bold")
 
     return tooltip;
