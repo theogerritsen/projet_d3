@@ -3,7 +3,7 @@ const margin = {top: 20, right: 20, bottom: 90, left: 120},
     height = 400 - margin.top - margin.bottom;
 
     // on définit la fonction pour remplir les deux axes
-
+//yes
 // pour X on utilise une échelle ordinale pour présenter une liste
 // de données ordonnées (le nom des cantons)
 const x = d3.scaleBand()
