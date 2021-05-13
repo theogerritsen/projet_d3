@@ -28,16 +28,24 @@ const div = d3.select("body").append("div")
     .style("opacity", 0);
 
 // importation des données
+var promises = [];
+promises.push(d3.csv("data/pop_cantons.csv"))
 
-d3.csv("data/pop_cantons.csv").then(function(data) {
+Promise.all(promises).then(function(data) {
     // conversion en integer pour être sûr
-    data.forEach(d => d.score = +d.score);
+    const mydata = data[0];
+    //scores.forEach(d => d.score = +d.score);
+    //console.log(mydata)
+
+
+    // donc là notre mydata est égal au data pour la version d'avant
 
     // on met pour l'axe x la liste de nos cantons
-    x.domain(data.map(d => d.canton));
+    x.domain(mydata.map(d => d.canton));
     // le domain de l'axe y sera entre 0 et le max des scores (population)
-    y.domain([0, d3.max(data, d => d.score)]);
-
+    // on met un + devant le d pour convertir notre string en nombre
+    y.domain([0, d3.max(mydata, d => +d.score)]);
+// console.log(d3.max(mydata, d => +d.score))
     // on ajoute notre axe x au SVG
     // on déplace l'axe x et le futur text avec la fonction transalte en bas du SVG
     // on sélectionne notre texte, on le positionne et on le rotate
@@ -56,7 +64,7 @@ d3.csv("data/pop_cantons.csv").then(function(data) {
 
 
     svg.selectAll(".bar")
-        .data(data)
+        .data(mydata)
         // on peut maintenant créer notre bar plot
     .enter().append("rect")
         .attr("class", "bar")
