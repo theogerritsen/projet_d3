@@ -1,16 +1,42 @@
 // initialisation
 
 const width = document.getElementById("container").offsetWidth * 0.9,
-    height = 700,
+    height = 500,
     legendCellSize = 20,
+    margin = {top: 20, right: 20, bottom: 90, left: 120},
+    width2 = 500 - margin.left - margin.right,
+    height2 = 400 - margin.top - margin.bottom,
     colors = ['#ffffcc', '#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
 
 const svg = d3.select('#map').append("svg")
     .attr("id", "svg")
-    .attr("width", width)
+    .attr("width", width/1.9)
     .attr("height", height)
     .attr("class", "svg");
 
+// on crée une variable pour contenir nos barplots
+const barplot = d3.select('#my_dataviz').append("svg")
+    .attr("id", "svg")
+    .attr("width", width2 + margin.left + margin.right)
+    .attr("height", height2 + 200)
+    .append("g")
+    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+    // on crée notre variable x qui doit être contenue dans la const barplot
+    // donc le range doit être au max le width de barplot
+const x = d3.scaleBand()
+// le range indique que nos données vont s'étaler sur toute la largeur de notre graphique
+    .range([0, width2])
+    .padding(0.1);
+
+const y = d3.scaleLinear()
+    .range([height2, 10]);
+
+
+// nous ajoutons un div pour le tooltip
+const div = d3.select("body").append("div")
+    .attr("class", "tooltip")
+    .style("opacity", 0);
 // traitement de la projection
 
 // définition de la projection
@@ -27,7 +53,7 @@ const path = d3.geoPath()
 
 // TITRES ET SOUS-TITRES
 svg.append("text")
-    .attr("x", (width / 2))
+    .attr("x", (width / 3))
     .attr("y", 25)
     .attr("text-anchor", "middle")
     .style("fill", "#c1d3b8")
@@ -35,14 +61,14 @@ svg.append("text")
     .style("font-size", "16px")
     .text("Proportion de jeunes (0-19 ans) par canton (2019)");
 
-/* svg.append("text")
-    .attr("x", (width / 2))
-    .attr("y", 50)
+svg.append("text")
+    .attr("x", (width / 1.3))
+    .attr("y", 25)
     .attr("text-anchor", "middle")
-    .style("fill", "#929292")
-    .style("font-weight", "200")
-    .style("font-size", "12px")
-    .text("(source : Gallup Report 2018 - Global Law and Order)"); */
+    .style("fill", "#c1d3b8")
+    .style("font-weight", "300")
+    .style("font-size", "16px")
+    .text("Population par canton (2019)");
 
 const cGroup = svg.append("g");
 
@@ -51,16 +77,18 @@ var promises = [];
 // avec fichier geojson WGS84 on a la carte qui s'affiche
 promises.push(d3.json("data/cantons_encl.geojson"));
 promises.push(d3.csv("data/pop_cantons2.csv"));
+promises.push(d3.csv("data/pop_cantons.csv"));
 
 Promise.all(promises).then(function(values) {
     const geojson = values[0];
     const scores = values[1];
-
+    const mydata = values[2];
+    console.log(mydata)
     var b  = path.bounds(geojson),
     // dimension de notre carte
     // le .80 permet de calculer 80% de la place à notre carte que nous avons assigné à notre canevas SVG
-        s = .70 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-        t = [(900 - s * (b[1][0] + b[0][0])) / 2, (600 - s * (b[1][1] + b[0][1])) / 2];
+        s = .50 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+        t = [(550 - s * (b[1][0] + b[0][0])) / 2, (500 - s * (b[1][1] + b[0][1])) / 2];
 
         projection
         .scale(s)
@@ -153,6 +181,59 @@ function getColorIndex(color) {
                 tooltip.attr("transform", "translate(" + mouse[0] + "," + (mouse[1] - 75) + ")");
             });
     });
+
+////////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////
+///////////////////// BARPLOT //////////////////////////////////////
+////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+    x.domain(mydata.map(f => f.canton));
+    // le domain de l'axe y sera entre 0 et le max des scores (population)
+    // on met un + devant le d pour convertir notre string en nombre
+    y.domain([0, d3.max(mydata, f => +f.score)]);
+// console.log(d3.max(mydata, d => +d.score))
+    // on ajoute notre axe x au SVG
+    // on déplace l'axe x et le futur text avec la fonction transalte en bas du SVG
+    // on sélectionne notre texte, on le positionne et on le rotate
+    barplot.append("g")
+        .attr("transform", "translate(0," + height2 + ")")
+        .call(d3.axisBottom(x).tickSize([1]))
+        .selectAll("text")
+            .style("text-anchor", "end")
+            .attr("dx", "-.8em")
+            .attr("dy", ".15em")
+            .attr("transform", "rotate(-65)");
+
+    // on ajoute l'axe Y à notre SVG avec 6 ticks (graduation)
+    barplot.append("g")
+        .call(d3.axisLeft(y).ticks(6))
+        .selectAll(".bar")
+        .data(mydata)
+        // on peut maintenant créer notre bar plot
+        .enter().append("rect")
+        .attr("class", "bar")
+        // on définit notre x comme étant nos cantons
+        .attr("x", f => x(f.canton))
+        // ici on gère la largeur des barres
+        .attr("width", x.bandwidth())
+        .attr("y", f => y(f.score))
+        // on définit la hauteur des barres par rapport au score de chaque canton
+        .attr("height", f => height2 - y(f.score))
+        .on("mouseover", function(event, f) {
+            div.transition()
+                .duration(200)
+                .style("opacity", .9);
+                // on ajout un petit tooltip qui nous montre la population
+                // quand on fait un mouseover
+            div.html("Population : " + f.score)
+                .style("left", (event.pageX) + "px")
+                .style("top", (event.pageY - 50) + "px");
+        })
+        .on("mouseout", function(f) {
+            div.transition()
+                .duration(500)
+                .style("opacity", 0);
+        });
 });
 
 // CONSTRUCTION DE LA LEGENDE GRADUEE
@@ -236,12 +317,6 @@ function addLegend(min, max) {
 
         return legend;
 
-}
-// construction du graphique scatter plot
-
-function addGraph() {
-    var scatterplot = svg.append("g")
-        .attr('transform', 'translate(80, 50)')
 }
 // CONSTRUCTION DU TOOL TIP
 function addTooltip(){
