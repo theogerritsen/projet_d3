@@ -3,7 +3,21 @@
     color: #bebebe;
     font-family: "Helvetica";
 }
-    
+/* permet de supprimer le gap entre nos deux svg */
+.container svg {
+    float: left;
+}
+html, body, svg {
+    margin: 0;
+  }
+body {
+    background-color: #232521;
+}
+.barplot {
+    background:#232521;
+    color: #bebebe;
+    font-family: "Helvetica";
+}   
 .cnt {
     fill: #999;
     stroke: white;
@@ -23,10 +37,6 @@
 .axis text {
     fill: #c1d3b8;
 }
-#map {
-    margin-top:20px;
-}
-
 #my_dataviz {
     border: 1px solid #DEDEDE;
     }
@@ -39,16 +49,14 @@
     fill: #23415A;
     }
     
-    .tooltip {
+    .tooltip2 {
     position: absolute;
-    opacity:0.8;
-    z-index:1000;
-    text-align:left;
-    border-radius:4px;
-    -webkit-border-radius:4px;
-    padding:8px;
-    color:#fff;
-    background-color:#000;
+    text-anchor: middle;
+    padding: 8px;
+    border-width: 1.5px;
+    border-style: solid;
+    color:#555555;
+    background-color:#b1b1b1;
     font: 12px sans-serif;
     max-width: 300px;
     }

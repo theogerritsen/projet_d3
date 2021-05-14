@@ -1,26 +1,28 @@
 // initialisation
 
-const width = document.getElementById("container").offsetWidth * 0.9,
+const width = document.getElementById("container").offsetWidth,
     height = 500,
     legendCellSize = 20,
-    margin = {top: 20, right: 20, bottom: 90, left: 120},
+    margin = {top: 0, right: 20, bottom: 90, left: 120},
     width2 = 500 - margin.left - margin.right,
     height2 = 400 - margin.top - margin.bottom,
     colors = ['#ffffcc', '#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
+    console.log(width)
 
 const svg = d3.select('#map').append("svg")
     .attr("id", "svg")
-    .attr("width", width/1.9)
+    .attr("width", width/2.05)
     .attr("height", height)
     .attr("class", "svg");
 
 // on crée une variable pour contenir nos barplots
 const barplot = d3.select('#my_dataviz').append("svg")
     .attr("id", "svg")
-    .attr("width", width2 + margin.left + margin.right)
-    .attr("height", height2 + 200)
+    .attr("width", width/2)
+    .attr("height", height2 + 190)
+    .attr("class", "svg")
     .append("g")
-    .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+    .attr("transform", "translate(0" + margin.left + "," + margin.top + ")");
 
     // on crée notre variable x qui doit être contenue dans la const barplot
     // donc le range doit être au max le width de barplot
@@ -35,7 +37,7 @@ const y = d3.scaleLinear()
 
 // nous ajoutons un div pour le tooltip
 const div = d3.select("body").append("div")
-    .attr("class", "tooltip")
+    .attr("class", "tooltip2")
     .style("opacity", 0);
 // traitement de la projection
 
@@ -53,21 +55,21 @@ const path = d3.geoPath()
 
 // TITRES ET SOUS-TITRES
 svg.append("text")
-    .attr("x", (width / 3))
+    .attr("x", (width / 4))
     .attr("y", 25)
     .attr("text-anchor", "middle")
     .style("fill", "#c1d3b8")
     .style("font-weight", "300")
-    .style("font-size", "16px")
+    .style("font-size", "14px")
     .text("Proportion de jeunes (0-19 ans) par canton (2019)");
 
-svg.append("text")
-    .attr("x", (width / 1.3))
+barplot.append("text")
+    .attr("x", (width2 / 2))
     .attr("y", 25)
     .attr("text-anchor", "middle")
     .style("fill", "#c1d3b8")
     .style("font-weight", "300")
-    .style("font-size", "16px")
+    .style("font-size", "14px")
     .text("Population par canton (2019)");
 
 const cGroup = svg.append("g");
@@ -86,9 +88,9 @@ Promise.all(promises).then(function(values) {
     console.log(mydata)
     var b  = path.bounds(geojson),
     // dimension de notre carte
-    // le .80 permet de calculer 80% de la place à notre carte que nous avons assigné à notre canevas SVG
+    // le .50 permet de calculer 50% de la place à notre carte que nous avons assigné à notre canevas SVG
         s = .50 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-        t = [(550 - s * (b[1][0] + b[0][0])) / 2, (500 - s * (b[1][1] + b[0][1])) / 2];
+        t = [(width - s * (b[1][0] + b[0][0])) / 4, (500 - s * (b[1][1] + b[0][1])) / 2];
 
         projection
         .scale(s)
@@ -178,7 +180,7 @@ function getColorIndex(color) {
                 var mouse = d3.pointer(event);
                 // console.log(mouse)
                 // évite que le tooltip se retrouve sous le curseur de notre souris (avec le translate)
-                tooltip.attr("transform", "translate(" + mouse[0] + "," + (mouse[1] - 75) + ")");
+                tooltip.attr("transform", "translate(" + (mouse[0] - 190) + "," + (mouse[1] - 80) + ")");
             });
     });
 
@@ -342,7 +344,7 @@ function addTooltip(){
         .style("transform", "translate(0, 5)");
 
     var text = tooltip.append("text") // text contenant tout les tspan
-        .style("font-size", "13px")
+        .style("font-size", "12px")
         .style("fill", "black")
         .attr("transform", "translate(0, 20)");
 
@@ -352,14 +354,14 @@ function addTooltip(){
         .attr("id", "tooltip-country")
         .attr("text-anchor", "middle")
         .style("font-weight", "600")
-        .style("font-size", "16px");
+        .style("font-size", "14px");
 
     text.append("tspan") // text fixé
         .attr("x", 105)
         .attr("y", 30)
         .attr("text-anchor", "middle")
         .style("fill", "#4e4e4e")
-        .text("Population : ");
+        .text("Proportion : ");
 
     text.append("tspan") // score updaté par son id
         .attr("id", "tooltip-score")
