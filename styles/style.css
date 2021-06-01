@@ -21,10 +21,9 @@ body {
 .cnt {
     fill: #999;
     stroke: white;
-    stroke-width: 0.5px;
+    stroke-width: 1.2px;
     stroke-linecap: round;
     stroke-linejoin: round;
-    vector-effect: non-scaling-stroke;
 }
 .axis line {
     stroke: #c1d3b8;

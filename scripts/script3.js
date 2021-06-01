@@ -1,17 +1,17 @@
 // initialisation
 
 const width = document.getElementById("container").offsetWidth,
-    height = 500,
-    legendCellSize = 20,
+    height = 600,
+    legendCellSize = 40,
     margin = {top: 0, right: 20, bottom: 90, left: 120},
-    width2 = 500 - margin.left - margin.right,
-    height2 = 400 - margin.top - margin.bottom,
+    width2 = 700 - margin.left - margin.right,
+    height2 = 600 - margin.top - margin.bottom,
     colors = ['#ffffcc', '#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
     console.log(width)
 
 const svg = d3.select('#map').append("svg")
     .attr("id", "svg")
-    .attr("width", width/2.05)
+    .attr("width", width/2)
     .attr("height", height)
     .attr("class", "svg");
 
@@ -72,7 +72,7 @@ barplot.append("text")
     .style("font-size", "14px")
     .text("Population par canton (2019)");
 
-const cGroup = svg.append("g");
+const cantons = svg.append("g");
 
 // utilisation des promesse pour charger nos données
 var promises = [];
@@ -89,14 +89,14 @@ Promise.all(promises).then(function(values) {
     var b  = path.bounds(geojson),
     // dimension de notre carte
     // le .50 permet de calculer 50% de la place à notre carte que nous avons assigné à notre canevas SVG
-        s = .50 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-        t = [(width - s * (b[1][0] + b[0][0])) / 4, (500 - s * (b[1][1] + b[0][1])) / 2];
+        s = .65 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+        t = [(width - s * (b[1][0] + b[0][0])) / 3.5, (600 - s * (b[1][1] + b[0][1])) / 2];
 
         projection
         .scale(s)
         .translate(t);
         // on associe à chaque pays un id
-    cGroup.selectAll("path")
+    cantons.selectAll("path")
         .data(geojson.features)
         .enter()
         .append("path")
@@ -107,9 +107,8 @@ Promise.all(promises).then(function(values) {
 
 
         // TRAITEMENT DU FICHIER CSV
-        // fonction pour réduire le nom de certains pays
-        function shortCountryName(country) {
-            return country
+        function nom_cantons(canton) {
+            return canton
         }
 
 // fonction pour retrouver l'index d'une couleur dans notre tableau colors
@@ -140,9 +139,9 @@ function getColorIndex(color) {
     // pour chaque entrée de notre fichier CSV
     scores.forEach(function(e,i) {
         // récupération d'un polygone associé au pays
-        var countryPath = d3.select("#code" + e.code);
-        //console.log(countryPath)
-        countryPath
+        var path_canton = d3.select("#code" + e.code);
+
+        path_canton
         // ajout d'un attribut scorecolor qui sera utiliser pour sélectionner tous les ays d'une même couleur
             .attr("scorecolor", quantile(+e.score))
             // définition du fill du pays en fonction du quantile associé
@@ -150,12 +149,12 @@ function getColorIndex(color) {
             // ajout de l'événement mouseover (quand on passe au dessus avec la souris)
             .on("mouseover", function(d) {
                 // change la couleur du pays en violet
-                countryPath.style("fill", "#9966cc");
+                path_canton.style("fill", "#9966cc");
                 // affiche le tooltip
                 tooltip.style("display", null);
                 // met le nom du pays 
-                tooltip.select('#tooltip-country')
-                    .text(shortCountryName(e.canton));
+                tooltip.select('#tooltip-canton')
+                    .text(nom_cantons(e.canton));
                     // affiche le score du pays
                 tooltip.select('#tooltip-score')
                     .text(e.score);
@@ -168,7 +167,7 @@ function getColorIndex(color) {
             // ajout d'un événement lorsque le curseur part du pays
             .on("mouseout", function(d) {
                 // remet la bonne couleur du pays
-                countryPath.style("fill", quantile(+e.score));
+                path_canton.style("fill", quantile(+e.score));
                 // enlève le tooltip associé
                 tooltip.style("display", "none");
                 // enlève le curseur de la légende
@@ -202,13 +201,15 @@ function getColorIndex(color) {
         .call(d3.axisBottom(x).tickSize([1]))
         .selectAll("text")
             .style("text-anchor", "end")
-            .attr("dx", "-.8em")
-            .attr("dy", ".15em")
-            .attr("transform", "rotate(-65)");
+            .attr("dx", "-0.2em")
+            .attr("dy", "1em")
+            .style("font-size", "14px")
+            .attr("transform", "rotate(-45)");
 
     // on ajoute l'axe Y à notre SVG avec 6 ticks (graduation)
     barplot.append("g")
         .call(d3.axisLeft(y).ticks(6))
+        .attr("font-size", "12px")
         .selectAll(".bar")
         .data(mydata)
         // on peut maintenant créer notre bar plot
@@ -293,7 +294,7 @@ function addLegend(min, max) {
             legend.append("text")
                 .attr("x", -70)
                 .attr("y", 32.5 + colors.length * legendCellSize)
-                .style("font-size", "7px")
+                .style("font-size", "12px")
                 .style("color", "#929292")
                 .style("fill", "#929292")
                 .text("données manquantes");
@@ -314,6 +315,7 @@ function addLegend(min, max) {
         yAxisGenerator.tickValues([min, 0.184, 0.194, 0.204, 0.214, max]);
         legendAxis = legend.append("g")
             .attr("class", "axis")
+            .style("font-size", "12px")
             .call(yAxisGenerator);
 
 
@@ -351,7 +353,7 @@ function addTooltip(){
     text.append("tspan") // update des noms des pays par leur id
         .attr("x", 105)
         .attr("y", 0)
-        .attr("id", "tooltip-country")
+        .attr("id", "tooltip-canton")
         .attr("text-anchor", "middle")
         .style("font-weight", "600")
         .style("font-size", "14px");
