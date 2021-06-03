@@ -167,10 +167,11 @@ function getColorIndex(color) {
                 barplot.selectAll("g").remove();
                 // on fait la même chose pour le titre du grapje
                 barplot.selectAll("text").remove();
+                
                 path_canton
                 // ici on peut aller chercher le canton sur lequel on a cliqué
                 //console.log(path_canton)
-                    .style("stroke", "yellow")
+                    .style("fill", "yellow")
                     .style("stroke-width: 3px;");
                     // on va tout d'abord cherche le nom du canton sur lequel on a cliqué
                 var cant_select = e.code;
@@ -200,7 +201,8 @@ function getColorIndex(color) {
                     .attr("dx", "-0.2em")
                     .attr("dy", "1em")
                     .style("font-size", "14px")
-                    .attr("transform", "rotate(-45)");
+                    .attr("transform", "rotate(-45)")
+                    
                 
                 // ajout du titre du graph selon le nom du canton choisi
                 barplot.append("text")
@@ -210,16 +212,17 @@ function getColorIndex(color) {
                     .style("fill", "#c1d3b8")
                     .style("font-weight", "300")
                     .style("font-size", "20px")
-                    .text("Classe d'âge du canton sélectionné : " + e.cnt)
+                    .text("Classe d'âge du canton sélectionné : " + e.cnt);
+                
                 barplot.append("text")
-                .attr("x", (width2 / 2))
-                .attr("y", -10)
-                .attr("text-anchor", "middle")
-                .style("fill", "#c1d3b8")
-                .style("font-weight", "300")
-                .style("font-size", "20px")
-                .text("Population totale : " + e.pop)
-
+                    .attr("x", (width2 / 2))
+                    .attr("y", -10)
+                    .attr("text-anchor", "middle")
+                    .style("fill", "#c1d3b8")
+                    .style("font-weight", "300")
+                    .style("font-size", "20px")
+                    .text("Population totale : " + e.pop);
+                    //.text(h => h[cant_select])
                 // on ajoute l'axe Y à notre SVG avec 6 ticks (graduation)
                 barplot.append("g")
                     .call(d3.axisLeft(y).ticks(6))
@@ -233,24 +236,48 @@ function getColorIndex(color) {
                     .attr("x", h => x(h.year_class))
                     // ici on gère la largeur des barres
                     .attr("width", x.bandwidth())
-                    .attr("y", h => y(h[cant_select]))
+                    .attr("y", h => y(0))
                      // on définit la hauteur des barres par rapport au score de chaque canton
+                    .attr("height", h => height2 - y(0))
+
+
+                barplot.selectAll("text.bar")
+                    .data(year_class)
+                .enter().append("text")
+                    .attr("class", "bar")
+                    .attr("text-anchor", "middle")
+                    .style("fill", "white")
+                    .style("font-size", "18px")
+                    // on met les valeurs au milieu de chaque barplot
+                    .attr("x", h => x(h.year_class) + x.bandwidth()/2)
+                    .attr("y", h => y(h[cant_select])+height2)
+                    .text(h => h[cant_select])
+                    
+
+                    
+                    .on("mouseover", function(event, h) {
+                        div.transition()
+                            .duration(200)
+                            .style("opacity", .9);
+            // on ajout un petit tooltip qui nous montre la population
+            // quand on fait un mouseover
+                        div.html("Population : " + h[cant_select])
+                            .style("left", (event.pageX) + "px")
+                            .style("top", (event.pageY - 50) + "px");
+                    })
+                    .on("mouseout", function(d) {
+                        div.transition()
+                            .duration(500)
+                            .style("opacity", 0);
+                    })
+
+                // transition de 0.8 seconde pour construire les barplots
+                barplot.selectAll(".bar")
+                    .transition()
+                    .duration(800)
+
+                    .attr("y", h => y(h[cant_select]))
                     .attr("height", h => height2 - y(h[cant_select]))
-                        .on("mouseover", function(event, h) {
-                            div.transition()
-                                .duration(200)
-                                .style("opacity", .9);
-                // on ajout un petit tooltip qui nous montre la population
-                // quand on fait un mouseover
-                            div.html("Population : " + h[cant_select])
-                                .style("left", (event.pageX) + "px")
-                                .style("top", (event.pageY - 50) + "px");
-                        })
-                        .on("mouseout", function(d) {
-                            div.transition()
-                                .duration(500)
-                                .style("opacity", 0);
-                        });
                 })
             // ajout d'un événement lorsque le curseur part du pays
             .on("mouseout", function(d) {
