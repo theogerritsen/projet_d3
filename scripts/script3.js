@@ -3,9 +3,9 @@
 const width = document.getElementById("container").offsetWidth,
     height = 600,
     legendCellSize = 40,
-    margin = {top: 0, right: 20, bottom: 90, left: 120},
-    width2 = 700 - margin.left - margin.right,
-    height2 = 600 - margin.top - margin.bottom,
+    margin = {top: 70, right: 20, bottom: 0, left: 120},
+    width2 = 900 - margin.left - margin.right,
+    height2 = 450 - margin.top - margin.bottom,
     colors = ['#ffffcc', '#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
     console.log(width)
 
@@ -18,8 +18,8 @@ const svg = d3.select('#map').append("svg")
 // on crée une variable pour contenir nos barplots
 const barplot = d3.select('#my_dataviz').append("svg")
     .attr("id", "svg")
-    .attr("width", width/2)
-    .attr("height", height2 + 190)
+    .attr("width", width/2  )
+    .attr("height", height2 + 200)
     .attr("class", "svg")
     .append("g")
     .attr("transform", "translate(0" + margin.left + "," + margin.top + ")");
@@ -55,22 +55,13 @@ const path = d3.geoPath()
 
 // TITRES ET SOUS-TITRES
 svg.append("text")
-    .attr("x", (width / 4))
+    .attr("x", 300)
     .attr("y", 25)
     .attr("text-anchor", "middle")
     .style("fill", "#c1d3b8")
     .style("font-weight", "300")
-    .style("font-size", "14px")
+    .style("font-size", "20px")
     .text("Proportion de jeunes (0-19 ans) par canton (2019)");
-
-barplot.append("text")
-    .attr("x", (width2 / 2))
-    .attr("y", 25)
-    .attr("text-anchor", "middle")
-    .style("fill", "#c1d3b8")
-    .style("font-weight", "300")
-    .style("font-size", "14px")
-    .text("Population par canton (2019)");
 
 const cantons = svg.append("g");
 
@@ -79,17 +70,18 @@ var promises = [];
 // avec fichier geojson WGS84 on a la carte qui s'affiche
 promises.push(d3.json("data/cantons_encl.geojson"));
 promises.push(d3.csv("data/pop_cantons2.csv"));
-promises.push(d3.csv("data/pop_cantons.csv"));
+promises.push(d3.csv("data/year_class.csv"))
+
+var cantonActif = null;
 
 Promise.all(promises).then(function(values) {
     const geojson = values[0];
     const scores = values[1];
-    const mydata = values[2];
-    console.log(mydata)
+    const year_class = values[2];
     var b  = path.bounds(geojson),
     // dimension de notre carte
     // le .50 permet de calculer 50% de la place à notre carte que nous avons assigné à notre canevas SVG
-        s = .65 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+        s = .7 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
         t = [(width - s * (b[1][0] + b[0][0])) / 3.5, (600 - s * (b[1][1] + b[0][1])) / 2];
 
         projection
@@ -110,7 +102,7 @@ Promise.all(promises).then(function(values) {
         function nom_cantons(canton) {
             return canton
         }
-
+console.log(year_class)
 // fonction pour retrouver l'index d'une couleur dans notre tableau colors
 // on va aller chercher la couleur de notre index pour sélectionner tous
 // les pays qui ont cette couleur
@@ -141,6 +133,7 @@ function getColorIndex(color) {
         // récupération d'un polygone associé au pays
         var path_canton = d3.select("#code" + e.code);
 
+
         path_canton
         // ajout d'un attribut scorecolor qui sera utiliser pour sélectionner tous les ays d'une même couleur
             .attr("scorecolor", quantile(+e.score))
@@ -163,7 +156,102 @@ function getColorIndex(color) {
                 // on prend la position du carré de notre légende + 5, la couleur de notre index
                     .attr("transform", "translate(" + (legendCellSize + 5) + ", " + (getColorIndex(quantile(+e.score)) * legendCellSize) + ")")
                     .style("display", null);
+
             })
+            .on("click", function(d){
+
+                
+                // pour chaque clique, il faut déjà enlever le graph qui était déjà présent (si c'est le cas)
+                // on utilise .remove() pour enlever le SVG en question, afin d'updater nos graphiques
+                // à chaque clique
+                barplot.selectAll("g").remove();
+                // on fait la même chose pour le titre du grapje
+                barplot.selectAll("text").remove();
+                path_canton
+                // ici on peut aller chercher le canton sur lequel on a cliqué
+                //console.log(path_canton)
+                    .style("stroke", "yellow")
+                    .style("stroke-width: 3px;");
+                    // on va tout d'abord cherche le nom du canton sur lequel on a cliqué
+                var cant_select = e.code;
+
+                    ////////////////////////////////////////////////////////////////////
+                    //////////////////////////////////////////////////////////////////
+                    ///////////////////// BARPLOT //////////////////////////////////////
+                    ////////////////////////////////////////////////////////////////////
+                    ///////////////////////////////////////////////////////////////////
+                x.domain(year_class.map(h => h.year_class));
+                // le domain de l'axe y sera entre 0 et le max des scores (population)
+                // h[...] permet d'aller récupérer le nom du canton que nous avions récupérer plus
+                // haut dans une variable
+                // on met un + devant le d pour convertir notre string en nombre
+                
+                y.domain([0, d3.max(year_class, h => +h[cant_select])]);
+                // on va chercher le nom du canton qu'on a cliqué avec e.code
+                console.log(cant_select)
+                // on ajoute notre axe x au SVG
+                // on déplace l'axe x et le futur text avec la fonction transalte en bas du SVG
+                // on sélectionne notre texte, on le positionne et on le rotate
+                barplot.append("g")
+                    .attr("transform", "translate(0," + height2 + ")")
+                    .call(d3.axisBottom(x).tickSize([1]))
+                .selectAll("text")
+                    .style("text-anchor", "end")
+                    .attr("dx", "-0.2em")
+                    .attr("dy", "1em")
+                    .style("font-size", "14px")
+                    .attr("transform", "rotate(-45)");
+                
+                // ajout du titre du graph selon le nom du canton choisi
+                barplot.append("text")
+                    .attr("x", (width2 / 2))
+                    .attr("y", -50)
+                    .attr("text-anchor", "middle")
+                    .style("fill", "#c1d3b8")
+                    .style("font-weight", "300")
+                    .style("font-size", "20px")
+                    .text("Classe d'âge du canton sélectionné : " + e.cnt)
+                barplot.append("text")
+                .attr("x", (width2 / 2))
+                .attr("y", -10)
+                .attr("text-anchor", "middle")
+                .style("fill", "#c1d3b8")
+                .style("font-weight", "300")
+                .style("font-size", "20px")
+                .text("Population totale : " + e.pop)
+
+                // on ajoute l'axe Y à notre SVG avec 6 ticks (graduation)
+                barplot.append("g")
+                    .call(d3.axisLeft(y).ticks(6))
+                    .attr("font-size", "12px")
+                    .selectAll(".bar")
+                    .data(year_class)
+                    // on peut maintenant créer notre bar plot
+                .enter().append("rect")
+                    .attr("class", "bar")
+                    // on définit notre x comme étant nos cantons
+                    .attr("x", h => x(h.year_class))
+                    // ici on gère la largeur des barres
+                    .attr("width", x.bandwidth())
+                    .attr("y", h => y(h[cant_select]))
+                     // on définit la hauteur des barres par rapport au score de chaque canton
+                    .attr("height", h => height2 - y(h[cant_select]))
+                        .on("mouseover", function(event, h) {
+                            div.transition()
+                                .duration(200)
+                                .style("opacity", .9);
+                // on ajout un petit tooltip qui nous montre la population
+                // quand on fait un mouseover
+                            div.html("Population : " + h[cant_select])
+                                .style("left", (event.pageX) + "px")
+                                .style("top", (event.pageY - 50) + "px");
+                        })
+                        .on("mouseout", function(d) {
+                            div.transition()
+                                .duration(500)
+                                .style("opacity", 0);
+                        });
+                })
             // ajout d'un événement lorsque le curseur part du pays
             .on("mouseout", function(d) {
                 // remet la bonne couleur du pays
@@ -182,61 +270,6 @@ function getColorIndex(color) {
                 tooltip.attr("transform", "translate(" + (mouse[0] - 190) + "," + (mouse[1] - 80) + ")");
             });
     });
-
-////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////
-///////////////////// BARPLOT //////////////////////////////////////
-////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////
-    x.domain(mydata.map(f => f.canton));
-    // le domain de l'axe y sera entre 0 et le max des scores (population)
-    // on met un + devant le d pour convertir notre string en nombre
-    y.domain([0, d3.max(mydata, f => +f.score)]);
-// console.log(d3.max(mydata, d => +d.score))
-    // on ajoute notre axe x au SVG
-    // on déplace l'axe x et le futur text avec la fonction transalte en bas du SVG
-    // on sélectionne notre texte, on le positionne et on le rotate
-    barplot.append("g")
-        .attr("transform", "translate(0," + height2 + ")")
-        .call(d3.axisBottom(x).tickSize([1]))
-        .selectAll("text")
-            .style("text-anchor", "end")
-            .attr("dx", "-0.2em")
-            .attr("dy", "1em")
-            .style("font-size", "14px")
-            .attr("transform", "rotate(-45)");
-
-    // on ajoute l'axe Y à notre SVG avec 6 ticks (graduation)
-    barplot.append("g")
-        .call(d3.axisLeft(y).ticks(6))
-        .attr("font-size", "12px")
-        .selectAll(".bar")
-        .data(mydata)
-        // on peut maintenant créer notre bar plot
-        .enter().append("rect")
-        .attr("class", "bar")
-        // on définit notre x comme étant nos cantons
-        .attr("x", f => x(f.canton))
-        // ici on gère la largeur des barres
-        .attr("width", x.bandwidth())
-        .attr("y", f => y(f.score))
-        // on définit la hauteur des barres par rapport au score de chaque canton
-        .attr("height", f => height2 - y(f.score))
-        .on("mouseover", function(event, f) {
-            div.transition()
-                .duration(200)
-                .style("opacity", .9);
-                // on ajout un petit tooltip qui nous montre la population
-                // quand on fait un mouseover
-            div.html("Population : " + f.score)
-                .style("left", (event.pageX) + "px")
-                .style("top", (event.pageY - 50) + "px");
-        })
-        .on("mouseout", function(f) {
-            div.transition()
-                .duration(500)
-                .style("opacity", 0);
-        });
 });
 
 // CONSTRUCTION DE LA LEGENDE GRADUEE
@@ -244,7 +277,7 @@ function getColorIndex(color) {
 function addLegend(min, max) {
     var legend = svg.append('g')
     // on déplace notre groupe (légende) un peu vers le bas
-        .attr('transform', 'translate(80, 50)');
+        .attr('transform', 'translate(80, 100)');
 
     // palette de couleur
     legend.selectAll()
@@ -281,24 +314,6 @@ function addLegend(min, max) {
                         // et on leur remet la couleur correspondante à leur score
                         .style('fill', colors[d]);
                 });
-            
-                // création d'un carré gris sous la légende pour les données manquantes
-                legend.append('svg:rect')
-                .attr('y', legendCellSize + colors.length * legendCellSize)
-                .attr('height', legendCellSize + 'px')
-                .attr('width', legendCellSize + 'px')
-                .attr('x', 5)
-                .style("fill", "#999")
-            
-                // texte pour les valeurs manquantes
-            legend.append("text")
-                .attr("x", -70)
-                .attr("y", 32.5 + colors.length * legendCellSize)
-                .style("font-size", "12px")
-                .style("color", "#929292")
-                .style("fill", "#929292")
-                .text("données manquantes");
-            
             // création du curseur pour la légende intéractive avec un polyine
             legend.append("polyline")
                 .attr("points", legendCellSize + ",0 " + legendCellSize + "," + legendCellSize + " " + (legendCellSize * 0.2) + "," + (legendCellSize / 2))
