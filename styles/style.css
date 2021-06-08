@@ -34,10 +34,6 @@ h1, h2, p {
     .bar {
     fill: steelblue;
     }
-    
-    .bar:hover {
-    fill: #23415A;
-    }
 .desc {
     width: 60%;
     text-align: justify;
