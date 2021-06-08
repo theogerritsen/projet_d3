@@ -1,26 +1,21 @@
 // initialisation
 
-const width = document.getElementById("container").offsetWidth,
-    height = 600,
+const width = document.getElementById("container").offsetWidth*0.48,
     legendCellSize = 40,
     margin = {top: 70, right: 20, bottom: 0, left: 120},
-    width2 = 900 - margin.left - margin.right,
+    height = 600,
     height2 = 450 - margin.top - margin.bottom,
     colors = ['#ffffcc', '#a1dab4', '#41b6c4', '#2c7fb8', '#253494'];
-    console.log(width)
 
-const svg = d3.select('#map').append("svg")
-    .attr("id", "svg")
-    .attr("width", width/2)
-    .attr("height", height)
-    .attr("class", "svg");
+const map = d3.select('#map').append("svg")
+    .attr("class", "svg")
+    .call(responsivefy);
 
 // on crée une variable pour contenir nos barplots
-const barplot = d3.select('#my_dataviz').append("svg")
-    .attr("id", "svg")
-    .attr("width", width/2  )
-    .attr("height", height2 + 200)
+const barplot = d3.select('#barplot').append("svg")
     .attr("class", "svg")
+
+    .call(responsivefy)
     .append("g")
     .attr("transform", "translate(0" + margin.left + "," + margin.top + ")");
 
@@ -28,7 +23,7 @@ const barplot = d3.select('#my_dataviz').append("svg")
     // donc le range doit être au max le width de barplot
 const x = d3.scaleBand()
 // le range indique que nos données vont s'étaler sur toute la largeur de notre graphique
-    .range([0, width2])
+    .range([0, width*0.8])
     .padding(0.1);
 
 const y = d3.scaleLinear()
@@ -54,16 +49,16 @@ const path = d3.geoPath()
     .projection(projection);
 
 // TITRES ET SOUS-TITRES
-svg.append("text")
+map.append("text")
     .attr("x", 300)
     .attr("y", 25)
     .attr("text-anchor", "middle")
-    .style("fill", "#c1d3b8")
+    .style("fill", "#666666")
     .style("font-weight", "300")
     .style("font-size", "20px")
     .text("Proportion de jeunes (0-19 ans) par canton (2019)");
 
-const cantons = svg.append("g");
+const cantons = map.append("g");
 
 // utilisation des promesse pour charger nos données
 var promises = [];
@@ -72,8 +67,6 @@ promises.push(d3.json("data/cantons_encl.geojson"));
 promises.push(d3.csv("data/pop_cantons2.csv"));
 promises.push(d3.csv("data/year_class.csv"))
 
-var cantonActif = null;
-
 Promise.all(promises).then(function(values) {
     const geojson = values[0];
     const scores = values[1];
@@ -81,8 +74,8 @@ Promise.all(promises).then(function(values) {
     var b  = path.bounds(geojson),
     // dimension de notre carte
     // le .50 permet de calculer 50% de la place à notre carte que nous avons assigné à notre canevas SVG
-        s = .7 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
-        t = [(width - s * (b[1][0] + b[0][0])) / 3.5, (600 - s * (b[1][1] + b[0][1])) / 2];
+        s = 0.8 / Math.max((b[1][0] - b[0][0]) / width, (b[1][1] - b[0][1]) / height),
+        t = [(width - s * (b[1][0] + b[0][0])) / 1.9, (600 - s * (b[1][1] + b[0][1])) / 2];
 
         projection
         .scale(s)
@@ -102,7 +95,6 @@ Promise.all(promises).then(function(values) {
         function nom_cantons(canton) {
             return canton
         }
-console.log(year_class)
 // fonction pour retrouver l'index d'une couleur dans notre tableau colors
 // on va aller chercher la couleur de notre index pour sélectionner tous
 // les pays qui ont cette couleur
@@ -142,7 +134,7 @@ function getColorIndex(color) {
             // ajout de l'événement mouseover (quand on passe au dessus avec la souris)
             .on("mouseover", function(d) {
                 // change la couleur du pays en violet
-                path_canton.style("fill", "#9966cc");
+                path_canton.style("fill", "#ff8f63");
                 // affiche le tooltip
                 tooltip.style("display", null);
                 // met le nom du pays 
@@ -170,9 +162,7 @@ function getColorIndex(color) {
                 
                 path_canton
                 // ici on peut aller chercher le canton sur lequel on a cliqué
-                //console.log(path_canton)
-                    .style("fill", "yellow")
-                    .style("stroke-width: 3px;");
+                    .style("fill", "yellow");
                     // on va tout d'abord cherche le nom du canton sur lequel on a cliqué
                 var cant_select = e.code;
 
@@ -189,12 +179,12 @@ function getColorIndex(color) {
                 
                 y.domain([0, d3.max(year_class, h => +h[cant_select])]);
                 // on va chercher le nom du canton qu'on a cliqué avec e.code
-                console.log(cant_select)
                 // on ajoute notre axe x au SVG
                 // on déplace l'axe x et le futur text avec la fonction transalte en bas du SVG
                 // on sélectionne notre texte, on le positionne et on le rotate
                 barplot.append("g")
                     .attr("transform", "translate(0," + height2 + ")")
+                    .style("class", "axis")
                     .call(d3.axisBottom(x).tickSize([1]))
                 .selectAll("text")
                     .style("text-anchor", "end")
@@ -206,19 +196,19 @@ function getColorIndex(color) {
                 
                 // ajout du titre du graph selon le nom du canton choisi
                 barplot.append("text")
-                    .attr("x", (width2 / 2))
+                    .attr("x", (width*0.35))
                     .attr("y", -50)
                     .attr("text-anchor", "middle")
-                    .style("fill", "#c1d3b8")
+                    .style("fill", "#666666")
                     .style("font-weight", "300")
                     .style("font-size", "20px")
                     .text("Classe d'âge du canton sélectionné : " + e.cnt);
                 
                 barplot.append("text")
-                    .attr("x", (width2 / 2))
+                    .attr("x", (width*0.35))
                     .attr("y", -10)
                     .attr("text-anchor", "middle")
-                    .style("fill", "#c1d3b8")
+                    .style("fill", "#666666")
                     .style("font-weight", "300")
                     .style("font-size", "20px")
                     .text("Population totale : " + e.pop);
@@ -236,21 +226,23 @@ function getColorIndex(color) {
                     .attr("x", h => x(h.year_class))
                     // ici on gère la largeur des barres
                     .attr("width", x.bandwidth())
+                    // on commence avec un y = 0 pour que les barplots montent progressivement
+                    // avec la transition
                     .attr("y", h => y(0))
                      // on définit la hauteur des barres par rapport au score de chaque canton
                     .attr("height", h => height2 - y(0))
 
 
-                barplot.selectAll("text.bar")
+                barplot.selectAll(".text")
                     .data(year_class)
                 .enter().append("text")
-                    .attr("class", "bar")
+                    .attr("class", "text")
                     .attr("text-anchor", "middle")
-                    .style("fill", "white")
+                    .style("fill", "#e7e7e7")
                     .style("font-size", "18px")
                     // on met les valeurs au milieu de chaque barplot
                     .attr("x", h => x(h.year_class) + x.bandwidth()/2)
-                    .attr("y", h => y(h[cant_select])+height2)
+                    .attr("y", h => y(0))
                     .text(h => h[cant_select])
                     
 
@@ -271,13 +263,17 @@ function getColorIndex(color) {
                             .style("opacity", 0);
                     })
 
-                // transition de 0.8 seconde pour construire les barplots
+                // transition de 0.8 seconde pour construire les barplots et le texte
                 barplot.selectAll(".bar")
                     .transition()
-                    .duration(800)
-
+                    .duration(500)
                     .attr("y", h => y(h[cant_select]))
                     .attr("height", h => height2 - y(h[cant_select]))
+
+                barplot.selectAll(".text")
+                    .transition()
+                    .duration(500)
+                    .attr("y", h => y(h[cant_select])+30)
                 })
             // ajout d'un événement lorsque le curseur part du pays
             .on("mouseout", function(d) {
@@ -292,7 +288,6 @@ function getColorIndex(color) {
                 // d3.mouse n'est plus une fonction gérée par la v6 -> utiliser d3.pointer(event)
                 // déplace le tooltip selon la position du curseur
                 var mouse = d3.pointer(event);
-                // console.log(mouse)
                 // évite que le tooltip se retrouve sous le curseur de notre souris (avec le translate)
                 tooltip.attr("transform", "translate(" + (mouse[0] - 190) + "," + (mouse[1] - 80) + ")");
             });
@@ -302,10 +297,10 @@ function getColorIndex(color) {
 // CONSTRUCTION DE LA LEGENDE GRADUEE
 
 function addLegend(min, max) {
-    var legend = svg.append('g')
+    var legend = map.append('g')
     // on déplace notre groupe (légende) un peu vers le bas
         .attr('transform', 'translate(80, 100)');
-
+    var triangleSize = legendCellSize/2;
     // palette de couleur
     legend.selectAll()
     // on va chercher la longueur de notre liste colors pour avoir
@@ -329,7 +324,7 @@ function addLegend(min, max) {
                         .style("display", null);
                     // on sélectionne tous les pays qui ont la valeur sélectionnée par notre curseur
                     d3.selectAll("path[scorecolor='" + colors[d] + "']")
-                        .style('fill', "#9966cc");
+                        .style('fill', "#ff8f63");
                 })
                 // création d'un énévement lorsque la souris part
                 // pour enlever les pays sélectionnés
@@ -343,11 +338,11 @@ function addLegend(min, max) {
                 });
             // création du curseur pour la légende intéractive avec un polyine
             legend.append("polyline")
-                .attr("points", legendCellSize + ",0 " + legendCellSize + "," + legendCellSize + " " + (legendCellSize * 0.2) + "," + (legendCellSize / 2))
+                .attr("points", triangleSize + "," + (triangleSize-10) + " " + triangleSize + "," + (triangleSize+10) + " " + (legendCellSize * 0.2) + "," + (legendCellSize / 2))
                 .attr("id", "cursor")
                 .style("display", "none")
                 // on met le curseur en violet comme les pays
-                .style('fill', "#9966cc");
+                .style('fill', "#ff8f63");
         // graduation de l'échelle
 
         var legendScale = d3.scaleSequential().domain([min, max])
@@ -366,12 +361,12 @@ function addLegend(min, max) {
 }
 // CONSTRUCTION DU TOOL TIP
 function addTooltip(){
-    var tooltip = svg.append("g") // groupe pour tout le tooltip
+    var tooltip = map.append("g") // groupe pour tout le tooltip
         .attr("id", "tooltip")
         .style("display", "none");
 
     tooltip.append("polyline") // rectangle contenant le texte
-        .attr("points", "30,0 180,0 180,60 30,60 30,0")
+        .attr("points", "30,0 200,0 200,60 30,60 30,0")
         .style("fill", "#c6c6c6")
         .style("stroke", "#838383")
         .style("opacity", "0.8")
@@ -381,7 +376,7 @@ function addTooltip(){
     tooltip.append("line") // une ligne entre les noms des pays et les scores
         .attr("x1", 50)
         .attr("y1", 25)
-        .attr("x2", 160)
+        .attr("x2", 180)
         .attr("y2", 25)
         .style("stroke", "#4e4e4e")
         .style("stroke-width", "0.5")
@@ -393,7 +388,7 @@ function addTooltip(){
         .attr("transform", "translate(0, 20)");
 
     text.append("tspan") // update des noms des pays par leur id
-        .attr("x", 105)
+        .attr("x", 115)
         .attr("y", 0)
         .attr("id", "tooltip-canton")
         .attr("text-anchor", "middle")
@@ -401,7 +396,7 @@ function addTooltip(){
         .style("font-size", "14px");
 
     text.append("tspan") // text fixé
-        .attr("x", 105)
+        .attr("x", 115)
         .attr("y", 30)
         .attr("text-anchor", "middle")
         .style("fill", "#4e4e4e")
@@ -414,3 +409,46 @@ function addTooltip(){
 
     return tooltip;
 }
+
+// fonction pour redimensionner plots selon taille de la fenêtre
+function responsivefy(svg) {
+    // on sélectionne l'un ou l'autre plot (map ou barplot)
+    // avec node().parentNode
+    // on redéfinit la largeur qui doit être la moitié de l'écran (pour chaque plot)
+    // on définit l'aspect
+const plot = d3.select(svg.node().parentNode),
+    width = document.getElementById("container").offsetWidth*0.48,
+    height = 600,
+        aspect = width / height;
+   
+    // on utilise ici la fonction viewBox qui permet
+    // de dynamiquement redéfinir les attributs de taille (largeur et hauteur)
+    // d'un élément
+    // on lui donne comme valeur initial 0 0 width height
+    // les deux premiers 0 sont minx et miny
+    // on appelle notre fonction resize définie plus bas lors du chargement initial de la page
+    svg.attr('viewBox', `0 0 ${width} ${height}`)
+        .attr('preserveAspectRatio', 'xMinYMid')
+        .call(resize);
+   
+    // add a listener so the chart will be resized
+    // when the window resizes
+    // multiple listeners for the same event type
+    // requires a namespace, i.e., 'click.foo'
+    // api docs: https://goo.gl/F3ZCFr
+    d3.select(window).on(
+        'resize.' + plot.attr('id'), 
+        resize
+    );
+    // this is the code that resizes the chart
+    // it will be called on load
+    // and in response to window resizes
+    // gets the width of the container
+    // and resizes the svg to fill it
+    // while maintaining a consistent aspect ratio
+    function resize() {
+        const w = document.getElementById("container").offsetWidth*0.48;
+        svg.attr('width', w);
+        svg.attr('height', Math.round(w / aspect));
+    }
+  }

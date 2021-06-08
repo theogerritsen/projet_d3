@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Premier essai de carte</title>
+    <title>Jeune population suisse</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="https://unpkg.com/topojson@3"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
@@ -14,15 +14,30 @@
     <link rel="stylesheet" href="styles/colorbrewer.css">
 </head>
 <body>
-    <h1>Population par canton suisse et proportion de jeune pour chaque canton</h1>
-    <h2>Cette carte intéractive permet d'avoir un bref aperçu de la population suisse. Chaque canton indique la proportion de jeune (par rapport à la population totale du canton). Il est possible de sélectionner un canton à l'aide du curseur de la souris et de voir la proportion correspondante sur la légende à gauche</h2>
-	<div id="container" class="container">
-    <div class="content-box"></div>
-    <g id="map"></g>
-        <g id="my_dataviz"></g>
+    <div id="title">
+        <div id="source" class="source">
+            <a>Fond de carte :
+            <a href="https://www.swisstopo.admin.ch/fr/geodata/landscape/boundaries3d.html">swissBOUNDARIES3D</a>
+            </a>
+            <p> Données : 
+            <a href="https://www.pxweb.bfs.admin.ch/pxweb/fr/">STAT-TAB</a>
+            </p>
+        </div>
+        <h1>Proportion de jeunes et classe d'âge par canton</h1>
+    </div>
+        <div class="desc">
+        <p>Chaque canton indique la proportion de jeune (par rapport à la population totale du canton). 
+        Il est possible de sélectionner un canton à l'aide du curseur de la souris et de voir la 
+        proportion correspondante sur la légende à gauche. En sélectionnant un canton, il est également
+        possible de voir la population de jeune par classe d'âge pour le canton sélectionné</p>
+        </div>
+    <div id="container" class="svg-container">
+        <g id="map"></g>
+        <g id="barplot"></g>
 
-    <script src="scripts/script3.js"></script>
+        <script src="scripts/script3.js"></script>
     <!-- <script src="scripts/script3.js"></script> -->
     </div>
+
 </body>
 </html>

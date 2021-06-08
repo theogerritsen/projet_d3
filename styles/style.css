@@ -1,43 +1,34 @@
-.svg {
-    background: #232521;
-    color: #bebebe;
-    font-family: "Helvetica";
-}
+
 /* permet de supprimer le gap entre nos deux svg */
-.container svg {
-    float: left;
-}
+
 html, body, svg {
     margin: 0;
+    font-family: Arial,sans-serif !important;
+    background: #cfcfcf;
+    color: #666666;
   }
-body {
-    background-color: #232521;
+h1, h2, p {
+    padding: 10px;
 }
 .barplot {
     background:#232521;
     color: #bebebe;
-    font-family: "Helvetica";
-}   
-.cnt {
-    fill: #999;
-    stroke: white;
-    stroke-width: 1.2px;
-    stroke-linecap: round;
-    stroke-linejoin: round;
+    position: absolute;
+    font-family: Arial,sans-serif !important;
 }
 .axis line {
-    stroke: #c1d3b8;
+    stroke: #666666;
 }
 
 .axis path {
-    stroke: #c1d3b8;
+    stroke: #666666;
 }
 
 .axis text {
-    fill: #c1d3b8;
+    fill: #666666;
 }
-#my_dataviz {
-    border: 1px solid #DEDEDE;
+#barplot {
+    border: 1px solid #cfcfcf;
     }
     
     .bar {
@@ -47,15 +38,16 @@ body {
     .bar:hover {
     fill: #23415A;
     }
-    
-    .tooltip2 {
-    position: absolute;
-    text-anchor: middle;
-    padding: 8px;
-    border-width: 1.5px;
-    border-style: solid;
-    color:#555555;
-    background-color:#b1b1b1;
-    font: 12px sans-serif;
-    max-width: 300px;
-    }
+.desc {
+    width: 60%;
+    text-align: justify;
+}
+#source {
+    float: right;
+    margin-top: 10px;
+    margin-right: 10px;
+    text-align: right;
+}
+.tooltip {
+    font-family: Arial,sans-serif !important;
+}
