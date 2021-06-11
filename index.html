@@ -4,12 +4,13 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jeune population suisse</title>
+    <title>Proportion de jeunes par canton</title>
     <script src="https://d3js.org/d3.v6.min.js"></script>
     <script src="https://unpkg.com/topojson@3"></script>
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/topojson/3.0.2/topojson.min.js"></script>
     <script src="https://d3js.org/d3-geo-projection.v3.min.js"></script>
     <link rel="stylesheet" href="styles/style.css">
+    <link rel="icon" href="data/figs/icon.png">
     <!-- fichier css contenant tous les dégradés de couleurs-->
     <link rel="stylesheet" href="styles/colorbrewer.css">
 </head>
@@ -23,18 +24,18 @@
             <a href="https://www.pxweb.bfs.admin.ch/pxweb/fr/" target="_blank">STAT-TAB</a>
             </p>
         </div>
-        <h1>Proportion de jeunes et classe d'âge par canton</h1>
+        <h1>Proportion de jeunes et classes d'âge par canton</h1>
     </div>
         <div class="desc">
-        <p>Chaque canton indique la proportion de jeune (par rapport à la population totale du canton). 
-        Il est possible de sélectionner un canton à l'aide du curseur de la souris et de voir la 
-        proportion correspondante sur la légende à gauche. En sélectionnant un canton, il est également
-        possible de voir la population de jeune par classe d'âge pour le canton sélectionné</p>
+        <p>La couleur des cantons indique la proportion de jeunes (par rapport à la population totale du canton) en Suisse. 
+        Lors du survol du curseur au-dessus d'un canton, la légende à gauche se met dynamiquement à jour. 
+        Il est également possible de survoler la légende afin de voir les cantons avec la proportion voulue.
+        En sélectionnant (cliquant) un canton, un graphique en barre se met à jour à droite indiquant la population de jeunes par classe
+    d'âge pour le canton indiqué.</p>
         </div>
     <div id="container" class="svg-container">
         <g id="map"></g>
         <g id="barplot"></g>
-
         <script src="scripts/script3.js"></script>
     <!-- <script src="scripts/script3.js"></script> -->
     </div>

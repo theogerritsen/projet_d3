@@ -1,6 +1,3 @@
-
-/* permet de supprimer le gap entre nos deux svg */
-
 html, body, svg {
     margin: 0;
     font-family: Arial,sans-serif !important;
@@ -29,9 +26,8 @@ h1, h2, p {
 }
 #barplot {
     border: 1px solid #cfcfcf;
-    }
-    
-    .bar {
+    }    
+.bar {
     fill: steelblue;
     }
 .desc {
