@@ -109,8 +109,8 @@ La visualisation de ce programme doit se faire à l'aide d'un serveur local. Il 
 
 1. Télécharger le fichier ZIP et l'extraire dans le répertoire désiré
 2. Ouvrir votre terminal favori et changer votre répertoire pour l'endroit ou vous avez extrait le dossier :
-    * `cd *path*` permet de changer le répertoire dans lequel vous êtes
-3. Une fois dans le répertoire, générez le serveur en tapant `python3 -m http.server` dans votre invite de commande
+    * `cd` *path* permet de changer le répertoire dans lequel vous êtes
+3. Une fois dans le répertoire, générez le serveur en tapant `python(3) -m http.server` dans votre invite de commande
 4. Le `port HTTP` est ensuite spécifié : `http://[::]:8000/`
 5. Il est alors possible de rentrer `localhost:8000` dans son navigateur afin d'afficher le programme
 
